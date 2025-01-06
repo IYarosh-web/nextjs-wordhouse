@@ -86,3 +86,33 @@ export type InvoiceForm = {
   amount: number;
   status: 'pending' | 'paid';
 };
+
+export type Word = {
+  id: string;
+  title: string;
+  examples: Example['id'];
+  description: string;
+  source?: string;
+  tags: Tag['id'];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type Example = {
+  id: string;
+  word_id: string;
+  sentence: string;
+}
+
+export type Tag = {
+  id: string;
+  title: string;
+}
+
+export type WordForm = {
+  title: string;
+  sentences: Array<Example['sentence']>;
+  description: string;
+  tags: Array<Tag['id']>;
+  source?: string;
+}
