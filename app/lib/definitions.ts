@@ -90,17 +90,16 @@ export type InvoiceForm = {
 export type Word = {
   id: string;
   title: string;
-  examples: Example['id'];
+  examples: Array<Example['id']>;
   description: string;
   source?: string;
-  tags: Tag['id'];
+  tags: Array<Tag['id']>;
   createdAt: string;
   updatedAt: string;
 }
 
 export type Example = {
   id: string;
-  word_id: string;
   sentence: string;
 }
 

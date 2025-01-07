@@ -67,3 +67,7 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
     totalPages,
   ];
 };
+
+export const formatDate = (date: Date) => {
+  return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDay() + 1} ${date.getHours() + 1}:${date.getMinutes()}`;
+}

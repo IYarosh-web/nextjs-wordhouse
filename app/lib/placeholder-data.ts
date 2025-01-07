@@ -1,4 +1,8 @@
 // This file contains placeholder data that you'll be replacing with real data in the Data Fetching chapter:
+
+import { Word } from "./definitions";
+import { formatDate } from "./utils";
+
 // https://nextjs.org/learn/dashboard-app/fetching-data
 const users = [
   {
@@ -144,4 +148,24 @@ const revenue = [
   { month: 'Dec', revenue: 4800 },
 ];
 
-export { users, customers, invoices, revenue };
+const words: Omit<Word, "id">[] = [
+  {
+    title: "Test word",
+    description: "",
+    source: "",
+    examples: [],
+    tags: [],
+    createdAt: formatDate(new Date()),
+    updatedAt: formatDate(new Date()),
+  }, {
+    title: "Test 2",
+    description: "",
+    source: "",
+    examples: [],
+    tags: [],
+    createdAt: formatDate(new Date()),
+    updatedAt: formatDate(new Date()),
+  }
+]
+
+export { users, customers, invoices, revenue, words };

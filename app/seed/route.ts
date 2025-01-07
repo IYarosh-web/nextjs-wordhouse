@@ -4,6 +4,51 @@ import { invoices, customers, revenue, users } from '../lib/placeholder-data';
 
 const client = await db.connect();
 
+async function seedWords() {
+  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS words (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      description TEXT NOT NULL,
+      source VARCHAR(255) NOT NULL,
+      created_at VARCHAR(255) NOT NULL,
+      updated_aT VARCHAR(255) NOT NULL
+    );
+  `
+}
+
+async function seedExamples() {
+  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS examples (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      CONSTRAINT word_id FOREIGN KEY (id)
+      REFERENCES words(id),
+      sentence TEXT NOT NULL
+    )
+  `;
+}
+
+async function seedTags() {
+  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS tags (
+      id VARCHAR(255) NOT NULL PRIMARY KEY
+    )
+  `;
+
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS tagsToWords (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      word_id UUID,
+      tag_id VARCHAR(255),
+      CONSTRAINT fk_word FOREIGN KEY (word_id) REFERENCES words(id),
+      CONSTRAINT fk_tag FOREIGN KEY (tag_id) REFERENCES tags(id)
+    )
+  `;
+}
+
 async function seedUsers() {
   await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
   await client.sql`
@@ -102,6 +147,7 @@ async function seedRevenue() {
 }
 
 export async function GET() {
+  console.log("Seed route");
   // return Response.json({
   //   message:
   //     'Uncomment this file and remove this line. You can delete this file when you are finished.',
@@ -112,6 +158,9 @@ export async function GET() {
     await seedCustomers();
     await seedInvoices();
     await seedRevenue();
+    await seedWords();
+    await seedTags();
+    await seedExamples();
     await client.sql`COMMIT`;
 
     return Response.json({ message: 'Database seeded successfully' });
