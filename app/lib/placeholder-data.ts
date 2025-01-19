@@ -148,8 +148,9 @@ const revenue = [
   { month: 'Dec', revenue: 4800 },
 ];
 
-const words: Omit<Word, "id">[] = [
+const words: Word[] = [
   {
+    id: "1",
     title: "Test word",
     description: "",
     source: "",
@@ -158,6 +159,7 @@ const words: Omit<Word, "id">[] = [
     createdAt: formatDate(new Date()),
     updatedAt: formatDate(new Date()),
   }, {
+    id: "2",
     title: "Test 2",
     description: "",
     source: "",
