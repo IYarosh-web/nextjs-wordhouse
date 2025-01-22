@@ -104,14 +104,13 @@ export type Example = {
 }
 
 export type Tag = {
-  id: string;
-  title: string;
+  slug: string
 }
 
 export type WordForm = {
   title: string;
   sentences: Array<Example['sentence']>;
   description: string;
-  tags: Array<Tag['id']>;
+  tags: Array<Tag['slug']>;
   source?: string;
 }

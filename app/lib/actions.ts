@@ -30,6 +30,21 @@ const FormSchema = z.object({
   date: z.string(),
 });
 
+const ExampleSchema = z.object({
+  sentence: z.string(),
+});
+
+const TagSchema = z.object({
+  slug: z.string(),
+});
+
+const WordSchema = z.object({
+  title: z.string(),
+  examples: z.array(ExampleSchema),
+  description: z.string(),
+  tags: z.array(TagSchema),
+});
+
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
  
@@ -67,6 +82,130 @@ export async function createInvoice(prevState: State, formData: FormData) {
   redirect('/dashboard/invoices');
 }
 
+export async function createWord(formData: FormData, userId: string) {
+  const {
+    title,
+    examples,
+    description,
+    source,
+    tags,
+  } = WordSchema.parse({
+    title: formData.get("title"),
+    examples: formData.get("examples"),
+    description: formData.get("description"),
+    source: formData.get("source"),
+    tags: formData.get("tags"),
+  });
+
+  // const savedExamples = [];
+  // for (const example of examples) {
+  //   const data = new FormData();
+
+  //   data.append("sentence", example.sentence);
+
+  //   await createExample(data);
+  // }
+
+  // const savedTags = []
+  // for (const tag of tags) {
+  //   const data = new FormData();
+
+  //   data.append("title", tag.title);
+
+  //   await createTag(data);
+  // }
+
+  // // Create word
+
+  // // Connect word with tags
+
+  // // Connect word with examples
+
+
+  await sql`
+    WITH ins_word AS (
+      INSERT INTO words(
+        id,
+        title,
+        description,
+        source,
+        created_at,
+        updated_at,
+        user_id
+      )
+        VALUES
+      (
+        gen_random_uuid (),
+        ${title},
+        ${description},
+        ${source},
+        EXTRACT(EPOCH FROM CURRENT_DATE)::BIGINT,
+        EXTRACT(EPOCH FROM CURRENT_DATE)::BIGINT,
+        ${userId}
+      )
+        ON CONFLICT DO NOTHING
+        RETURNING id as word_id
+    ), ins_examples AS (
+      INSERT INTO examples(
+        id,
+        word_id,
+        sentence,
+        created_at
+      )
+        VALUES
+      ${examples.map(example => `(
+        gen_random_uuid (),
+        SELECT word_id FROM ins_word,
+        ${example.sentence},
+        EXTRACT(EPOCH FROM CURRENT_DATE)::BIGINT
+        ON CONFLICT DO NOTHING
+      )`).join(",\n")}
+    ), ins_tags AS (
+      INSERT INTO tags(
+        id
+      )
+        VALUES
+      ${tags.map(tag => `(
+        ${tag.slug}
+      )`).join(",\n")}
+      ON CONFLICT DO NOTHING
+    ), ins_tags_word AS (
+      INSERT INTO tagsToWords (
+        id,
+        word_id,
+        tag_i
+      )
+    )
+  `
+}
+
+export async function createExample(formData: FormData) {
+  const {
+    sentence,
+  } = ExampleSchema.parse({
+    sentence: formData.get("sentence"),
+  });
+
+  await sql`
+    INSERT INTO examples (id, sentence, created_at)
+    VALUES (gen_random_uuid (), ${sentence}, EXTRACT(EPOCH FROM CURRENT_DATE)::BIGINT)
+    RETURNING id
+  `;
+}
+
+export async function createTag(formData: FormData) {
+  const {
+    title,
+  } = TagSchema.parse({
+    title: formData.get("title"),
+  });
+
+  await sql`
+    INSERT INTO tags (id, title)
+    VALUES (gen_random_uuid (), ${title})
+    RETURNING id
+  `;
+}
 
 export async function updateInvoice(id: string, formData: FormData) {
   const { customerId, amount, status } = UpdateInvoice.parse({
