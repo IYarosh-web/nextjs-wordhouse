@@ -218,3 +218,36 @@ export async function fetchFilteredCustomers(query: string) {
     throw new Error('Failed to fetch customer table.');
   }
 }
+
+export async function fetchAllWords() {
+  try {
+    const data = await sql<Revenue>`SELECT * FROM words`;
+
+    return data.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch words.');
+  }
+}
+
+export async function fetchAllTags() {
+  try {
+    const data = await sql<Revenue>`SELECT * FROM tags`;
+
+    return data.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch tags.');
+  }
+}
+
+export async function fetchAllExamples() {
+  try {
+    const data = await sql<Revenue>`SELECT * FROM examples`;
+
+    return data.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch examples.');
+  }
+}

@@ -12,6 +12,7 @@ export type State = {
     customerId?: string[];
     amount?: string[];
     status?: string[];
+    title?: string[];
   };
   message?: string | null;
 };
@@ -43,6 +44,7 @@ const WordSchema = z.object({
   examples: z.array(ExampleSchema),
   description: z.string(),
   tags: z.array(TagSchema),
+  source: z.string()
 });
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
@@ -82,14 +84,13 @@ export async function createInvoice(prevState: State, formData: FormData) {
   redirect('/dashboard/invoices');
 }
 
-export async function createWord(formData: FormData, userId: string) {
-  const {
-    title,
-    examples,
-    description,
-    source,
-    tags,
-  } = WordSchema.parse({
+export async function createWord(
+  userId: string,
+  prevState: State,
+  formData: FormData,
+) {
+  console.log("Create word");
+  const validatedFields = WordSchema.safeParse({
     title: formData.get("title"),
     examples: formData.get("examples"),
     description: formData.get("description"),
@@ -97,86 +98,92 @@ export async function createWord(formData: FormData, userId: string) {
     tags: formData.get("tags"),
   });
 
-  // const savedExamples = [];
-  // for (const example of examples) {
-  //   const data = new FormData();
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing fields. Failed to create word",
+    };
+  }
 
-  //   data.append("sentence", example.sentence);
+  const {
+    title,
+    examples,
+    description,
+    source,
+    tags,
+  } = validatedFields.data;
 
-  //   await createExample(data);
-  // }
-
-  // const savedTags = []
-  // for (const tag of tags) {
-  //   const data = new FormData();
-
-  //   data.append("title", tag.title);
-
-  //   await createTag(data);
-  // }
-
-  // // Create word
-
-  // // Connect word with tags
-
-  // // Connect word with examples
-
-
-  await sql`
-    WITH ins_word AS (
-      INSERT INTO words(
-        id,
-        title,
-        description,
-        source,
-        created_at,
-        updated_at,
-        user_id
-      )
-        VALUES
-      (
-        gen_random_uuid (),
-        ${title},
-        ${description},
-        ${source},
-        EXTRACT(EPOCH FROM CURRENT_DATE)::BIGINT,
-        EXTRACT(EPOCH FROM CURRENT_DATE)::BIGINT,
-        ${userId}
-      )
+  try {
+    await sql`
+      WITH ins_word AS (
+        INSERT INTO words(
+          id,
+          title,
+          description,
+          source,
+          created_at,
+          updated_at,
+          user_id
+        )
+          VALUES
+        (
+          gen_random_uuid (),
+          ${title},
+          ${description},
+          ${source},
+          EXTRACT(EPOCH FROM CURRENT_DATE)::BIGINT,
+          EXTRACT(EPOCH FROM CURRENT_DATE)::BIGINT,
+          ${userId}
+        )
+          ON CONFLICT DO NOTHING
+          RETURNING id as word_id
+      ), ins_examples AS (
+        INSERT INTO examples(
+          id,
+          word_id,
+          sentence,
+          created_at
+        )
+          VALUES
+        ${examples.map(example => `(
+          gen_random_uuid (),
+          SELECT word_id FROM ins_word,
+          ${example.sentence},
+          EXTRACT(EPOCH FROM CURRENT_DATE)::BIGINT
+          ON CONFLICT DO NOTHING
+        )`).join(",\n")}
+      ), ins_tags AS (
+        INSERT INTO tags(
+          id
+        )
+          VALUES
+        ${tags.map(tag => `(
+          ${tag.slug}
+        )`).join(",\n")}
         ON CONFLICT DO NOTHING
-        RETURNING id as word_id
-    ), ins_examples AS (
-      INSERT INTO examples(
-        id,
-        word_id,
-        sentence,
-        created_at
+      ), ins_tags_word AS (
+        INSERT INTO tagsToWords (
+          id,
+          word_id,
+          tag_id
+        )
+          VALUES
+        ${tags.map(tag => `(
+          gen_random_uuid (),
+          SELECT word_id FROM ins_word,
+          ${tag.slug}
+        )`).join(",\n")}
       )
-        VALUES
-      ${examples.map(example => `(
-        gen_random_uuid (),
-        SELECT word_id FROM ins_word,
-        ${example.sentence},
-        EXTRACT(EPOCH FROM CURRENT_DATE)::BIGINT
-        ON CONFLICT DO NOTHING
-      )`).join(",\n")}
-    ), ins_tags AS (
-      INSERT INTO tags(
-        id
-      )
-        VALUES
-      ${tags.map(tag => `(
-        ${tag.slug}
-      )`).join(",\n")}
-      ON CONFLICT DO NOTHING
-    ), ins_tags_word AS (
-      INSERT INTO tagsToWords (
-        id,
-        word_id,
-        tag_i
-      )
-    )
-  `
+    `;
+  } catch (err) {
+    console.log("Err", err);
+    return {
+      message: `Database error: Failed to create word: ${err}`
+    }
+  }
+
+  revalidatePath("/dashboard/invoices");
+  redirect('/dashboard/invoices');
 }
 
 export async function createExample(formData: FormData) {
