@@ -1,10 +1,13 @@
 import Link from 'next/link';
-import NavLinks from '@/app/ui/dashboard/nav-links';
+import NavWords from '@/app/ui/dashboard/nav-words';
 import AcmeLogo from '@/app/ui/acme-logo';
 import { PowerIcon } from '@heroicons/react/24/outline';
 import { signOut } from '@/auth';
+import { fetchWords } from '@/app/lib/data';
 
-export default function SideNav() {
+export default async function SideNav() {
+  const words = await fetchWords();
+
   return (
     <div className="flex h-full flex-col px-3 py-4 md:px-2">
       <Link
@@ -16,7 +19,7 @@ export default function SideNav() {
         </div>
       </Link>
       <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2">
-        <NavLinks />
+        <NavWords words={words} />
         <div className="hidden h-auto w-full grow rounded-md bg-gray-50 md:block"></div>
         <form
           action={async () => {

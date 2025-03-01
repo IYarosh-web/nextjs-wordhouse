@@ -1,16 +1,18 @@
-import { fetchAllExamples, fetchAllTags, fetchAllWords } from "../lib/data";
-import Form from "../ui/words/create-form";
+import { fetchWord } from "../lib/data";
+import WordModal from "../ui/dashboard/word-modal";
 
-async function DashboardPage() {
-  const words = await fetchAllWords();
-  const tags = await fetchAllTags();
-  const examples = await fetchAllExamples();
-  console.log({ words, tags, examples });
 
+type Props = {
+  searchParams: Record<string, string> | null | undefined;
+};
+
+async function DashboardPage({ searchParams }: Props) {
+  const wordId = searchParams?.word || "";
+  const word = await fetchWord(wordId);
   return (
     <div>
       <h1>Dashboard page</h1>
-      <Form />
+      {wordId && word && <WordModal word={word} />}
     </div>
   )
 }
