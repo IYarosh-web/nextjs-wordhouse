@@ -12,6 +12,14 @@ const WordSchema = z.object({
   description: z.string(),
 });
 
+export type State = {
+  errors?: {
+    title?: string[];
+    description?: string[];
+  };
+  message?: string | null;
+};
+
 export async function createWord(
   userId: string,
   prevState: State,

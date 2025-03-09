@@ -9,7 +9,7 @@ type Props = {
   word: Word;
 }
 
-function WordModal({
+function ViewWordModal({
   word
 }: Props) {
   const router = useRouter();
@@ -34,4 +34,4 @@ function WordModal({
   )
 }
 
-export default WordModal;
+export default ViewWordModal;
