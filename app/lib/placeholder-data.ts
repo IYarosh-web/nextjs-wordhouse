@@ -154,19 +154,19 @@ const words: Word[] = [
     title: "Test word",
     description: "",
     source: "",
-    examples: [],
-    tags: [],
-    createdAt: formatDate(new Date()),
-    updatedAt: formatDate(new Date()),
+    created_at: formatDate(new Date()),
+    updated_at: formatDate(new Date()),
+    translations: ['something'],
+    user_id: '410544b2-4001-4271-9855-fec4b6a6442a'
   }, {
     id: "2",
     title: "Test 2",
     description: "",
     source: "",
-    examples: [],
-    tags: [],
-    createdAt: formatDate(new Date()),
-    updatedAt: formatDate(new Date()),
+    created_at: formatDate(new Date()),
+    updated_at: formatDate(new Date()),
+    translations: ['somethingmore'],
+    user_id: '410544b2-4001-4271-9855-fec4b6a6442a'
   }
 ]
 

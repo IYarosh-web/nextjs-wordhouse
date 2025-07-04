@@ -12,9 +12,12 @@ export type User = {
 export type Word = {
   id: string;
   title: string;
-  description: string;
-  createdAt: string;
-  userId: string;
+  translations: string[];
+  description?: string;
+  source?: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
 }
 
 export type WordForm = {

@@ -10,12 +10,14 @@ import { AuthError } from 'next-auth';
 const WordSchema = z.object({
   title: z.string(),
   description: z.string(),
+  translations: z.string(),
 });
 
 export type State = {
   errors?: {
     title?: string[];
     description?: string[];
+    translations?: string[];
   };
   message?: string | null;
 };
@@ -29,6 +31,7 @@ export async function createWord(
   const validatedFields = WordSchema.safeParse({
     title: formData.get("title"),
     description: formData.get("description"),
+    translations: formData.get('translations'),
   });
 
   if (!validatedFields.success) {
@@ -41,6 +44,7 @@ export async function createWord(
   const {
     title,
     description,
+    translations,
   } = validatedFields.data;
 
   const created = new Date();
@@ -51,12 +55,16 @@ export async function createWord(
         id,
         title,
         description,
+        translations,
         created_at,
+        updated_at,
         user_id
       ) VALUES (
         gen_random_uuid(),
         ${title},
         ${description},
+        ${translations},
+        ${created.toISOString()},
         ${created.toISOString()},
         ${userId}
       )
